@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"github.com/bradclawsie/rscs/server"
 )
 
 func main() {
