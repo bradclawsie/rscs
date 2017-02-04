@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"log"
 	"github.com/bradclawsie/rscs/server"
+	"log"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func main() {
 	}
 	log.Printf("[rscs --cert=%s --key=%s --db=%s --readonly=%v]", tlsCertFile, tlsKeyFile, sqliteDBFile, readOnly)
 
-	_,srvErr := server.NewRscs(sqliteDBFile,readOnly)
+	_, srvErr := server.NewRscsServer(sqliteDBFile, readOnly)
 	if srvErr != nil {
 		log.Fatal(srvErr)
 	}
