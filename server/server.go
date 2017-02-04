@@ -1,26 +1,17 @@
 package server
 
 import (
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
-	"os"
+	"github.com/bradclawsie/rscs/db"
 )
 
-type Rscs struct {
-	sqliteDBFile string
-	db           *sql.DB
+type RscsServer struct {
+	rscsDB *db.RscsDB
 }
 
-func NewRscs(sqliteDBFile string) (*Rscs, error) {
-	if _, fileErr := os.Open(sqliteDBFile); fileErr != nil {
-		return nil, fileErr
+func NewRscsServer(sqliteDBFile string, readOnly bool) (*RscsServer, error) {
+	rscsDB, dbErr := db.NewRscsDB(sqliteDBFile, readOnly)
+	if dbErr != nil {
+		return dbErr, nil
 	}
-	db, connErr := sql.Open("sqlite3", sqliteDBFile)
-	if connErr != nil {
-		return nil, connErr
-	}
-	
-	// Validate the db
-
-	return &Rscs{db:db,sqliteDBFile:sqliteDBFile}, nil
+	return &RscsServer{rscsDB:rscsDB}, nil
 }

@@ -25,7 +25,7 @@ func main() {
 	}
 	log.Printf("[rscs --cert=%s --key=%s --db=%s --readonly=%v]", tlsCertFile, tlsKeyFile, sqliteDBFile, readOnly)
 
-	_,srvErr := server.NewRscs(sqliteDBFile)
+	_,srvErr := server.NewRscs(sqliteDBFile,readOnly)
 	if srvErr != nil {
 		log.Fatal(srvErr)
 	}
