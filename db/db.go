@@ -7,8 +7,19 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"errors"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3" //
 	"io/ioutil"
+)
+
+const (
+	// KVTableName is the KV table name.
+	KVTableName        = "kv"
+	// KVPrimaryKeyColumn is the KV primary key.
+	KVPrimaryKeyColumn = "key"
+	// KVValueColumn is the KV value.
+	KVValueColumn      = "value"
 )
 
 // RscsDB contains the state values for communicating with the underlying sqlite file.
@@ -59,4 +70,25 @@ func (r *RscsDB) ReadOnly() bool {
 // SHA256 returns the hash calculated for the DB file.
 func (r *RscsDB) SHA256() string {
 	return r.dbSHA256
+}
+
+// Get returns the value string for the key string. The second return
+// value is a 'found' flag that easily distinguishes a db error case
+// from that of no matching row.
+func (r *RscsDB) Get(key string) (string, bool, error) {
+	if key == "" {
+		return "", false, errors.New("key is an empty string")
+	}
+	queryStr := fmt.Sprintf("select %s from %s where %s=?",
+		KVValueColumn, KVTableName, KVPrimaryKeyColumn)
+	var value string
+	dbErr := r.db.QueryRow(queryStr, key).Scan(&value)
+	switch {
+	case dbErr == sql.ErrNoRows:
+		return "", false, nil
+	case dbErr != nil:
+		return "", false, dbErr
+	default:
+		return value, true, nil
+	}
 }

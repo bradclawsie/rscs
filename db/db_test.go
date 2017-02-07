@@ -52,3 +52,34 @@ func TestNewRscsDBValidSHA(t *testing.T) {
 		t.Errorf("fail on valid sha256")
 	}
 }
+
+func TestNewRscsDBValidGet(t *testing.T) {
+	rscsDB, err := NewRscsDB("../test/test.sqlite3", true)
+	if err != nil {
+		t.Errorf("fail on valid file")
+	}
+	value, found, getErr := rscsDB.Get("testkey")
+	if getErr != nil {
+		t.Errorf(getErr.Error())
+	}
+	if !found {
+		t.Errorf("should have found expected key")
+	}
+	if value != "testvalue" {
+		t.Errorf("return should be 'testvalue'")
+	}
+}
+
+func TestNewRscsDBInvalidGet(t *testing.T) {
+	rscsDB, err := NewRscsDB("../test/test.sqlite3", true)
+	if err != nil {
+		t.Errorf("fail on valid file")
+	}
+	_, found, getErr := rscsDB.Get("testkeyunexpected")
+	if getErr != nil {
+		t.Errorf(getErr.Error())
+	}
+	if found {
+		t.Errorf("should have not found unexpected key")
+	}
+}
