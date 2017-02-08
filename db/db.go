@@ -15,11 +15,11 @@ import (
 
 const (
 	// KVTableName is the KV table name.
-	KVTableName        = "kv"
+	KVTableName = "kv"
 	// KVPrimaryKeyColumn is the KV primary key.
 	KVPrimaryKeyColumn = "key"
 	// KVValueColumn is the KV value.
-	KVValueColumn      = "value"
+	KVValueColumn = "value"
 )
 
 // RscsDB contains the state values for communicating with the underlying sqlite file.
@@ -27,7 +27,6 @@ type RscsDB struct {
 	sqliteDBFile string
 	db           *sql.DB
 	dbSHA256     string
-	readOnly     bool
 }
 
 // dbFileSHA256 calculates the hash of the db file.
@@ -43,10 +42,8 @@ func dbFileSHA256(sqliteDBFile string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-// NewRscsDB initializes a new RscsDB instance. Write access is set
-// with `readOnly` set to true or false; it is assumed that most use will
-// be read-only hence the presumption in the parameter name.
-func NewRscsDB(sqliteDBFile string, readOnly bool) (*RscsDB, error) {
+// NewRscsDB initializes a new RscsDB instance.
+func NewRscsDB(sqliteDBFile string) (*RscsDB, error) {
 	dbSHA256, hashErr := dbFileSHA256(sqliteDBFile)
 	if hashErr != nil {
 		return nil, hashErr
@@ -58,18 +55,38 @@ func NewRscsDB(sqliteDBFile string, readOnly bool) (*RscsDB, error) {
 	return &RscsDB{
 		sqliteDBFile: sqliteDBFile,
 		db:           db,
-		dbSHA256:     dbSHA256,
-		readOnly:     readOnly}, nil
-}
-
-// ReadOnly tells if this DB read-only.
-func (r *RscsDB) ReadOnly() bool {
-	return r.readOnly
+		dbSHA256:     dbSHA256}, nil
 }
 
 // SHA256 returns the hash calculated for the DB file.
 func (r *RscsDB) SHA256() string {
 	return r.dbSHA256
+}
+
+// CreateTable will create a new kv table. You will need to DROP independently if needed.
+func (r *RscsDB) CreateTable() error {
+	queryStr := fmt.Sprintf("CREATE TABLE %s (%s VARCHAR(255) PRIMARY KEY, %s TEXT NOT NULL)",
+		KVTableName, KVPrimaryKeyColumn, KVValueColumn)
+	_, createErr := r.db.Exec(queryStr)
+	return createErr
+}
+
+// DropTable will drop the kv table.
+func (r *RscsDB) DropTable() error {
+	queryStr := fmt.Sprintf("DROP TABLE %s", KVTableName)
+	_, dropErr := r.db.Exec(queryStr)
+	return dropErr
+}
+
+// Insert will insert a new key/value pair.
+func (r *RscsDB) Insert(key, value string) error {
+	if key == "" || value == "" {
+		return errors.New("insert empty key or value")
+	}
+	queryStr := fmt.Sprintf("INSERT INTO %s (%s, %s) VALUES ($1, $2)",
+		KVTableName, KVPrimaryKeyColumn, KVValueColumn)
+	_, insertErr := r.db.Exec(queryStr, key, value)
+	return insertErr
 }
 
 // Get returns the value string for the key string. The second return
@@ -79,15 +96,15 @@ func (r *RscsDB) Get(key string) (string, bool, error) {
 	if key == "" {
 		return "", false, errors.New("key is an empty string")
 	}
-	queryStr := fmt.Sprintf("select %s from %s where %s=?",
+	queryStr := fmt.Sprintf("SELECT %s FROM %s WHERE %s=?",
 		KVValueColumn, KVTableName, KVPrimaryKeyColumn)
 	var value string
-	dbErr := r.db.QueryRow(queryStr, key).Scan(&value)
+	selectErr := r.db.QueryRow(queryStr, key).Scan(&value)
 	switch {
-	case dbErr == sql.ErrNoRows:
+	case selectErr == sql.ErrNoRows:
 		return "", false, nil
-	case dbErr != nil:
-		return "", false, dbErr
+	case selectErr != nil:
+		return "", false, selectErr
 	default:
 		return value, true, nil
 	}

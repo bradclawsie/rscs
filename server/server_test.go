@@ -1,6 +1,8 @@
 package server
 
 import (
+	"github.com/bradclawsie/rscs/db"
+	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -9,23 +11,29 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestNewRscsServerEmptyStr(t *testing.T) {
-	_, err := NewRscsServer("", true)
-	if err == nil {
-		t.Errorf("empty file str")
+func TestVaidRscsDB(t *testing.T) {
+	tmpDBFile, tmpFileErr := ioutil.TempFile("", "db_test_tmp")
+	if tmpFileErr != nil {
+		t.Fatalf(tmpFileErr.Error())
+	}
+	defer os.Remove(tmpDBFile.Name())
+	rscsDB, newDBErr := db.NewRscsDB(tmpDBFile.Name())
+	if newDBErr != nil {
+		t.Fatalf("fail on tmpfile new:%s", newDBErr.Error())
+	}
+	createErr := rscsDB.CreateTable()
+	if createErr != nil {
+		t.Fatalf("fail on create table:%s", createErr.Error())
+	}
+	_, newServerErr := NewRscsServer(rscsDB)
+	if newServerErr != nil {
+		t.Errorf("fail on valid RscsDB:%s", newServerErr.Error())
 	}
 }
 
-func TestNewRscsServerNotThere(t *testing.T) {
-	_, err := NewRscsServer("thisisnotthere.sqlite3", true)
-	if err == nil {
-		t.Errorf("missing file")
-	}
-}
-
-func TestNewRscsServerValid(t *testing.T) {
-	_, err := NewRscsServer("../test/test.sqlite3", true)
-	if err != nil {
-		t.Errorf("valid file")
+func TestNilRscsDB(t *testing.T) {
+	_, newErr := NewRscsServer(nil)
+	if newErr == nil {
+		t.Errorf("fail on nil RscsDB")
 	}
 }

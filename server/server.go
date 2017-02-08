@@ -3,6 +3,7 @@ package server
 
 import (
 	"github.com/bradclawsie/rscs/db"
+	"errors"
 )
 
 // RscsServer contains the state values for the underlying database instance
@@ -12,10 +13,9 @@ type RscsServer struct {
 }
 
 // NewRscsServer initializes a new RscsServer instance.
-func NewRscsServer(sqliteDBFile string, readOnly bool) (*RscsServer, error) {
-	rscsDB, dbErr := db.NewRscsDB(sqliteDBFile, readOnly)
-	if dbErr != nil {
-		return nil, dbErr
+func NewRscsServer(rscsDB *db.RscsDB) (*RscsServer, error) {
+	if rscsDB == nil {
+		return nil, errors.New("nil rscsDB")
 	}
 	return &RscsServer{rscsDB: rscsDB}, nil
 }
