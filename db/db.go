@@ -79,14 +79,39 @@ func (r *RscsDB) DropTable() error {
 }
 
 // Insert will insert a new key/value pair.
-func (r *RscsDB) Insert(key, value string) error {
+func (r *RscsDB) Insert(key, value string) (int, error) {
 	if key == "" || value == "" {
-		return errors.New("insert empty key or value")
+		return 0, errors.New("insert empty key or value")
 	}
 	queryStr := fmt.Sprintf("INSERT INTO %s (%s, %s) VALUES ($1, $2)",
 		KVTableName, KVPrimaryKeyColumn, KVValueColumn)
-	_, insertErr := r.db.Exec(queryStr, key, value)
-	return insertErr
+	result, insertErr := r.db.Exec(queryStr, key, value)
+	if insertErr != nil {
+		return 0, insertErr
+	}
+	rowCount, rowCountErr := result.RowsAffected()
+	if rowCountErr != nil {
+		return 0, rowCountErr
+	}
+	return int(rowCount), nil
+}
+
+// Delete will delete a row with ID key.
+func (r *RscsDB) Delete(key string) (int, error) {
+	if key == "" {
+		return 0, errors.New("delete empty key")
+	}
+	queryStr := fmt.Sprintf("DELETE FROM %s where %s = $1",
+		KVTableName, KVPrimaryKeyColumn)
+	result, deleteErr := r.db.Exec(queryStr, key)
+	if deleteErr != nil {
+		return 0, deleteErr
+	}
+	rowCount, rowCountErr := result.RowsAffected()
+	if rowCountErr != nil {
+		return 0, rowCountErr
+	}
+	return int(rowCount), nil
 }
 
 // Get returns the value string for the key string. The second return

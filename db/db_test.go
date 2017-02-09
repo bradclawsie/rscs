@@ -44,9 +44,12 @@ func TestWithTempDB(t *testing.T) {
 	const testValue = "testValue"
 
 	t.Run("insert", func(t *testing.T) {
-		insertErr := rscsDB.Insert(testKey, testValue)
+		rowCount, insertErr := rscsDB.Insert(testKey, testValue)
 		if insertErr != nil {
 			t.Errorf("insert fail:%s", insertErr.Error())
+		}
+		if rowCount != 1 {
+			t.Errorf("insert rowcount:%d", rowCount)
 		}
 	})
 
@@ -60,6 +63,26 @@ func TestWithTempDB(t *testing.T) {
 		}
 		if value != testValue {
 			t.Errorf("%s and %s not equal", value, testValue)
+		}
+	})
+
+	t.Run("delete", func(t *testing.T) {
+		rowCount, deleteErr := rscsDB.Delete(testKey)
+		if deleteErr != nil {
+			t.Errorf("delete fail:%s", deleteErr.Error())
+		}
+		if rowCount != 1 {
+			t.Errorf("delete rowcount:%d", rowCount)
+		}
+	})
+
+	t.Run("get-deleted", func(t *testing.T) {
+		_, found, getErr := rscsDB.Get(testKey)
+		if getErr != nil {
+			t.Errorf("get fail:%s", getErr.Error())
+		}
+		if found {
+			t.Errorf("deleted %s found", testKey)
 		}
 	})
 
@@ -93,13 +116,16 @@ func TestWithReadonlyTempDB(t *testing.T) {
 	const testKey = "testkey"
 	const testValue = "testValue"
 
-	insertErr := rscsDB.Insert(testKey, testValue)
+	rowCount, insertErr := rscsDB.Insert(testKey, testValue)
 	if insertErr != nil {
 		t.Fatalf("insert fail:%s", insertErr.Error())
 	}
+	if rowCount != 1 {
+		t.Errorf("insert rowcount:%d", rowCount)
+	}
 
 	// Now make it readonly.
-	chmodErr := os.Chmod(tmpDBFile.Name(),0444)
+	chmodErr := os.Chmod(tmpDBFile.Name(), 0444)
 	if chmodErr != nil {
 		t.Fatalf("chmod:%s", chmodErr.Error())
 	}
@@ -122,12 +148,16 @@ func TestWithReadonlyTempDB(t *testing.T) {
 	}
 
 	// We should not be able to write to the read-only file.
-	insertReadOnlyErr := rscsDBReadOnly.Insert("testkey2", testValue)
+	_, insertReadOnlyErr := rscsDBReadOnly.Insert("testkey2", testValue)
 	if insertReadOnlyErr == nil {
 		t.Errorf("should not be able to insert into readonly file")
 	}
-	
-	chmodErr = os.Chmod(tmpDBFile.Name(),0755)
+	_, deleteReadOnlyErr := rscsDBReadOnly.Delete("testkey")
+	if deleteReadOnlyErr == nil {
+		t.Errorf("should not be able to delete from readonly file")
+	}
+
+	chmodErr = os.Chmod(tmpDBFile.Name(), 0755)
 	if chmodErr != nil {
 		t.Fatalf("chmod:%s", chmodErr.Error())
 	}
