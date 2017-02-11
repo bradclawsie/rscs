@@ -44,7 +44,14 @@ func TestWithTempDB(t *testing.T) {
 	const testValue = "testValue"
 
 	t.Run("insert", func(t *testing.T) {
-		rowCount, insertErr := rscsDB.Insert(testKey, testValue)
+		rowCount, insertErr := rscsDB.Insert("", testValue)
+		if insertErr == nil {
+			t.Errorf("insert on empty key")
+		}
+		if rowCount != 0 {
+			t.Errorf("rowcount nonzero")
+		}
+		rowCount, insertErr = rscsDB.Insert(testKey, testValue)
 		if insertErr != nil {
 			t.Errorf("insert fail:%s", insertErr.Error())
 		}
@@ -66,8 +73,42 @@ func TestWithTempDB(t *testing.T) {
 		}
 	})
 
+	t.Run("update-valid", func(t *testing.T) {
+		rowCount, updateErr := rscsDB.Update("", "newval")
+		if updateErr == nil {
+			t.Errorf("update empty key")
+		}
+		if rowCount != 0 {
+			t.Errorf("rowcount nonzero")
+		}
+		rowCount, updateErr = rscsDB.Update(testKey, "newval")
+		if updateErr != nil {
+			t.Errorf("update fail:%s", updateErr.Error())
+		}
+		if rowCount != 1 {
+			t.Errorf("update rowcount:%d", rowCount)
+		}
+		value, found, getErr := rscsDB.Get(testKey)
+		if getErr != nil {
+			t.Errorf("get fail:%s", getErr.Error())
+		}
+		if !found {
+			t.Errorf("%s not found", testKey)
+		}
+		if value != "newval" {
+			t.Errorf("not updated value")
+		}
+	})
+
 	t.Run("delete", func(t *testing.T) {
-		rowCount, deleteErr := rscsDB.Delete(testKey)
+		rowCount, deleteErr := rscsDB.Delete("")
+		if deleteErr == nil {
+			t.Errorf("delete empty key")
+		}
+		if rowCount != 0 {
+			t.Errorf("rowcount nonzero")
+		}
+		rowCount, deleteErr = rscsDB.Delete(testKey)
 		if deleteErr != nil {
 			t.Errorf("delete fail:%s", deleteErr.Error())
 		}
@@ -118,7 +159,7 @@ func TestWithReadonlyTempDB(t *testing.T) {
 
 	rowCount, insertErr := rscsDB.Insert(testKey, testValue)
 	if insertErr != nil {
-		t.Fatalf("insert fail:%s", insertErr.Error())
+		t.Errorf("insert fail:%s", insertErr.Error())
 	}
 	if rowCount != 1 {
 		t.Errorf("insert rowcount:%d", rowCount)
@@ -151,6 +192,10 @@ func TestWithReadonlyTempDB(t *testing.T) {
 	_, insertReadOnlyErr := rscsDBReadOnly.Insert("testkey2", testValue)
 	if insertReadOnlyErr == nil {
 		t.Errorf("should not be able to insert into readonly file")
+	}
+	_, updateReadOnlyErr := rscsDBReadOnly.Update(testKey, "newval")
+	if updateReadOnlyErr == nil {
+		t.Errorf("should not be able to update into readonly file")
 	}
 	_, deleteReadOnlyErr := rscsDBReadOnly.Delete("testkey")
 	if deleteReadOnlyErr == nil {

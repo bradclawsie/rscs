@@ -80,8 +80,8 @@ func (r *RscsDB) DropTable() error {
 
 // Insert will insert a new key/value pair.
 func (r *RscsDB) Insert(key, value string) (int, error) {
-	if key == "" || value == "" {
-		return 0, errors.New("insert empty key or value")
+	if key == "" {
+		return 0, errors.New("insert empty key")
 	}
 	queryStr := fmt.Sprintf("INSERT INTO %s (%s, %s) VALUES ($1, $2)",
 		KVTableName, KVPrimaryKeyColumn, KVValueColumn)
@@ -101,11 +101,29 @@ func (r *RscsDB) Delete(key string) (int, error) {
 	if key == "" {
 		return 0, errors.New("delete empty key")
 	}
-	queryStr := fmt.Sprintf("DELETE FROM %s where %s = $1",
+	queryStr := fmt.Sprintf("DELETE FROM %s WHERE %s = $1",
 		KVTableName, KVPrimaryKeyColumn)
 	result, deleteErr := r.db.Exec(queryStr, key)
 	if deleteErr != nil {
 		return 0, deleteErr
+	}
+	rowCount, rowCountErr := result.RowsAffected()
+	if rowCountErr != nil {
+		return 0, rowCountErr
+	}
+	return int(rowCount), nil
+}
+
+// Update will give a row a new value.
+func (r *RscsDB) Update(key, value string) (int, error) {
+	if key == "" {
+		return 0, errors.New("update empty key")
+	}
+	queryStr := fmt.Sprintf("UPDATE %s SET %s = $1 WHERE %s is $2",
+		KVTableName, KVValueColumn, KVPrimaryKeyColumn)
+	result, updateErr := r.db.Exec(queryStr, value, key)
+	if updateErr != nil {
+		return 0, updateErr
 	}
 	rowCount, rowCountErr := result.RowsAffected()
 	if rowCountErr != nil {
