@@ -5,6 +5,7 @@ import (
 	"flag"
 	"github.com/bradclawsie/rscs/db"
 	"github.com/bradclawsie/rscs/server"
+	"github.com/pressly/chi"
 	"log"
 	"net/http"
 	"os"
@@ -38,10 +39,14 @@ func main() {
 	stopChan := make(chan os.Signal)
 	signal.Notify(stopChan, os.Interrupt)
 
-	mux := http.NewServeMux()
-	mux.Handle("/v1/db/sha256", http.HandlerFunc(rscsServer.SHA256))
+	rtr := chi.NewRouter()
 
-	srv := &http.Server{Addr: ":8081", Handler: mux}
+	rtr.Get("/v1/db/sha256", http.HandlerFunc(rscsServer.SHA256))
+
+	const kvRoute = "/v1/kv/:key"
+	rtr.Get(kvRoute, http.HandlerFunc(rscsServer.Get))
+	
+	srv := &http.Server{Addr: ":8081", Handler: rtr}
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
@@ -55,6 +60,6 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	srv.Shutdown(ctx)
-	
+
 	log.Println("Server gracefully stopped")
 }

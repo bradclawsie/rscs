@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/bradclawsie/rscs/db"
-	"io"
 	"net/http"
+	"strings"
 )
 
 // RscsServer contains the state values for the underlying database instance
@@ -40,6 +40,46 @@ func (s *RscsServer) SHA256(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-type", "application/json")
-	io.WriteString(w, string(jsonBytes))
+	w.Write(jsonBytes)
+	return
+}
+
+// GetResult contains the value corresponding to a key.
+type GetResult struct {
+	Value string
+}
+
+// Get retrieves the value for the key passed on the URL path.
+func (s *RscsServer) Get(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "only GET supported", http.StatusMethodNotAllowed)
+		return
+	}
+	pathElts := strings.Split(r.URL.Path, "/")
+	if len(pathElts) == 0 {
+		http.Error(w, "bad request path", http.StatusBadRequest)
+		return
+	}
+	key := pathElts[len(pathElts)-1]
+	if key == "" {
+		http.Error(w, "missing key", http.StatusBadRequest)
+		return
+	}
+	value, found, getErr := s.rscsDB.Get(key)
+	if getErr != nil {
+		http.Error(w, getErr.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !found {
+		http.Error(w, "no value found", http.StatusNotFound)
+		return
+	}
+	jsonBytes, jsonErr := json.Marshal(GetResult{Value: value})
+	if jsonErr != nil {
+		http.Error(w, jsonErr.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-type", "application/json")
+	w.Write(jsonBytes)
 	return
 }
