@@ -5,7 +5,6 @@ import (
 	"flag"
 	"github.com/bradclawsie/rscs/db"
 	"github.com/bradclawsie/rscs/server"
-	"github.com/pressly/chi"
 	"log"
 	"net/http"
 	"os"
@@ -39,13 +38,11 @@ func main() {
 	stopChan := make(chan os.Signal)
 	signal.Notify(stopChan, os.Interrupt)
 
-	rtr := chi.NewRouter()
+	rtr, rtrErr := rscsServer.NewRouter()
+	if rtrErr != nil {
+		log.Fatal(rtrErr.Error())
+	}
 
-	rtr.Get("/v1/db/sha256", http.HandlerFunc(rscsServer.SHA256))
-
-	const kvRoute = "/v1/kv/:key"
-	rtr.Get(kvRoute, http.HandlerFunc(rscsServer.Get))
-	
 	srv := &http.Server{Addr: ":8081", Handler: rtr}
 
 	go func() {

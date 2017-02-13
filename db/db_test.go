@@ -43,6 +43,12 @@ func TestWithTempDB(t *testing.T) {
 	const testKey = "testkey"
 	const testValue = "testValue"
 
+	t.Run("name", func(t *testing.T) {
+		if rscsDB.DBFileName() != tmpDBFile.Name() {
+			t.Errorf("cannot name db")
+		}
+	})
+
 	t.Run("insert", func(t *testing.T) {
 		rowCount, insertErr := rscsDB.Insert("", testValue)
 		if insertErr == nil {
@@ -149,6 +155,11 @@ func TestWithReadonlyTempDB(t *testing.T) {
 	if newErr != nil {
 		t.Fatalf("fail on tmpfile new:%s", newErr.Error())
 	}
+
+	if rscsDB.DBFileName() != tmpDBFile.Name() {
+		t.Errorf("cannot name db")
+	}
+
 	createErr := rscsDB.CreateTable()
 	if createErr != nil {
 		t.Fatalf("fail on create table:%s", createErr.Error())
@@ -205,19 +216,5 @@ func TestWithReadonlyTempDB(t *testing.T) {
 	chmodErr = os.Chmod(tmpDBFile.Name(), 0755)
 	if chmodErr != nil {
 		t.Fatalf("chmod:%s", chmodErr.Error())
-	}
-}
-
-func TestNewRscsDBEmptyStr(t *testing.T) {
-	_, err := NewRscsDB("")
-	if err == nil {
-		t.Errorf("fail on empty file str")
-	}
-}
-
-func TestNewRscsDBNotThere(t *testing.T) {
-	_, err := NewRscsDB("thisisnotthere.sqlite3")
-	if err == nil {
-		t.Errorf("fail on missing file")
 	}
 }

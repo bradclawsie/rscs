@@ -4,13 +4,10 @@
 package db
 
 import (
-	"crypto/sha256"
 	"database/sql"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3" //
-	"io/ioutil"
 )
 
 const (
@@ -26,41 +23,22 @@ const (
 type RscsDB struct {
 	sqliteDBFile string
 	db           *sql.DB
-	dbSHA256     string
-}
-
-// dbFileSHA256 calculates the hash of the db file.
-func dbFileSHA256(sqliteDBFile string) (string, error) {
-	h := sha256.New()
-	// The constructor needs to test for the file existing
-	// and being readable: the read below suffices.
-	contents, fileErr := ioutil.ReadFile(sqliteDBFile)
-	if fileErr != nil {
-		return "", fileErr
-	}
-	h.Write(contents)
-	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 // NewRscsDB initializes a new RscsDB instance.
 func NewRscsDB(sqliteDBFile string) (*RscsDB, error) {
-	dbSHA256, hashErr := dbFileSHA256(sqliteDBFile)
-	if hashErr != nil {
-		return nil, hashErr
-	}
 	db, connErr := sql.Open("sqlite3", sqliteDBFile)
 	if connErr != nil {
 		return nil, connErr
 	}
 	return &RscsDB{
 		sqliteDBFile: sqliteDBFile,
-		db:           db,
-		dbSHA256:     dbSHA256}, nil
+		db:           db}, nil
 }
 
-// SHA256 returns the hash calculated for the DB file.
-func (r *RscsDB) SHA256() string {
-	return r.dbSHA256
+// DBFileName returns the db used.
+func (r *RscsDB) DBFileName() string {
+	return r.sqliteDBFile
 }
 
 // CreateTable will create a new kv table. You will need to DROP independently if needed.
