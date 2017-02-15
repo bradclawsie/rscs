@@ -8,11 +8,18 @@ import (
 )
 
 const (
+	// KVRoutePrefix is the prefix for the kv route.
+	KVRoutePrefix = "/v1/kv"
 	// KVRoute is the route for all key/val operations.
-	KVRoute = "/v1/kv/:key"
+	KVRoute = KVRoutePrefix + "/:key"
 	// StatusRoute is the route for system status.
 	StatusRoute = "/v1/status"
 )
+
+// Value corresponds to a row value.
+type Value struct {
+	Value string
+}
 
 // RscsServer contains the state values for the underlying database instance
 // and for https routing.
@@ -33,6 +40,7 @@ func (s *RscsServer) NewRouter() (*chi.Mux, error) {
 	rtr := chi.NewRouter()
 
 	rtr.Get(KVRoute, s.Get)
+	rtr.Post(KVRoute, s.Insert)
 	rtr.Get(StatusRoute, s.Status)
 
 	return rtr, nil

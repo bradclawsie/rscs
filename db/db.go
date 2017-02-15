@@ -61,6 +61,9 @@ func (r *RscsDB) Insert(key, value string) (int, error) {
 	if key == "" {
 		return 0, errors.New("insert empty key")
 	}
+	if len(key) > 255 {
+		return 0, errors.New("key exceeds len")
+	}
 	queryStr := fmt.Sprintf("INSERT INTO %s (%s, %s) VALUES ($1, $2)",
 		KVTableName, KVPrimaryKeyColumn, KVValueColumn)
 	result, insertErr := r.db.Exec(queryStr, key, value)

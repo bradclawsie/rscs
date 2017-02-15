@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/bradclawsie/rscs/db"
 	"io"
@@ -74,6 +75,47 @@ func TestNilRscsDB(t *testing.T) {
 	_, newErr := NewRscsServer(nil)
 	if newErr == nil {
 		t.Errorf("fail on nil RscsDB")
+	}
+}
+
+func TestInsert(t *testing.T) {
+	key := "key1"
+	val := "val1"
+	vIn := Value{Value: val}
+	vJSON, jsonErr := json.Marshal(vIn)
+	if jsonErr != nil {
+		t.Errorf(jsonErr.Error())
+	}
+
+	emptyKeyRoute := KVRoutePrefix + "/"
+	emptyKeyResp, _ := testRequest(t, testServer, http.MethodPost, emptyKeyRoute, bytes.NewReader(vJSON))
+	if emptyKeyResp.StatusCode == http.StatusCreated {
+		t.Errorf("inserted empty key")
+	}
+
+	route := KVRoutePrefix + "/" + key
+	badBytes := []byte(`{"V":"val"}`)
+	badJSONResp, _ := testRequest(t, testServer, http.MethodPost, route, bytes.NewReader(badBytes))
+	if badJSONResp.StatusCode == http.StatusCreated {
+		t.Errorf("inserted bad JSON")
+	}
+
+	insertResp, _ := testRequest(t, testServer, http.MethodPost, route, bytes.NewReader(vJSON))
+	if insertResp.StatusCode != http.StatusCreated {
+		t.Errorf("not 201")
+	}
+
+	getResp, getBody := testRequest(t, testServer, http.MethodGet, route, nil)
+	if getResp.StatusCode != http.StatusOK {
+		t.Errorf("not 200")
+	}
+	var vOut Value
+	umErr := json.Unmarshal([]byte(getBody), &vOut)
+	if umErr != nil {
+		t.Errorf(umErr.Error())
+	}
+	if vIn.Value != vOut.Value {
+		t.Errorf("round trip values not equal")
 	}
 }
 

@@ -4,9 +4,14 @@
 package db
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"testing"
+)
+
+const (
+	memoryDBName = "file::memory:?mode=memory&cache=shared"
 )
 
 func TestMain(m *testing.M) {
@@ -14,12 +19,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestWithTempDB(t *testing.T) {
-	tmpDBFile, tmpFileErr := ioutil.TempFile("", "db_test_tmp")
-	if tmpFileErr != nil {
-		t.Fatalf(tmpFileErr.Error())
-	}
-	defer os.Remove(tmpDBFile.Name())
-	rscsDB, newErr := NewRscsDB(tmpDBFile.Name())
+	rscsDB, newErr := NewRscsDB(memoryDBName)
 	if newErr != nil {
 		t.Fatalf("fail on tmpfile new:%s", newErr.Error())
 	}
@@ -44,7 +44,7 @@ func TestWithTempDB(t *testing.T) {
 	const testValue = "testValue"
 
 	t.Run("name", func(t *testing.T) {
-		if rscsDB.DBFileName() != tmpDBFile.Name() {
+		if rscsDB.DBFileName() != memoryDBName {
 			t.Errorf("cannot name db")
 		}
 	})
@@ -57,6 +57,19 @@ func TestWithTempDB(t *testing.T) {
 		if rowCount != 0 {
 			t.Errorf("rowcount nonzero")
 		}
+
+		var badKey bytes.Buffer
+		for i := 0; i <= 255; i++ {
+			badKey.WriteString("a")
+		}
+		rowCount, insertErr = rscsDB.Insert(badKey.String(), testValue)
+		if insertErr == nil {
+			t.Errorf("insert on oversized key")
+		}
+		if rowCount != 0 {
+			t.Errorf("rowcount nonzero")
+		}
+
 		rowCount, insertErr = rscsDB.Insert(testKey, testValue)
 		if insertErr != nil {
 			t.Errorf("insert fail:%s", insertErr.Error())
@@ -64,6 +77,19 @@ func TestWithTempDB(t *testing.T) {
 		if rowCount != 1 {
 			t.Errorf("insert rowcount:%d", rowCount)
 		}
+
+		var goodKey bytes.Buffer
+		for i := 0; i < 255; i++ {
+			goodKey.WriteString("a")
+		}
+		rowCount, insertErr = rscsDB.Insert(goodKey.String(), testValue)
+		if insertErr != nil {
+			t.Errorf("insert fail:%s", insertErr.Error())
+		}
+		if rowCount != 1 {
+			t.Errorf("insert rowcount:%d", rowCount)
+		}
+
 	})
 
 	t.Run("get-valid", func(t *testing.T) {

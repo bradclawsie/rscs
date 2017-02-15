@@ -7,11 +7,6 @@ import (
 	"strings"
 )
 
-// GetResult contains the value corresponding to a key.
-type GetResult struct {
-	Value string
-}
-
 // Get retrieves the value for the key passed on the URL path.
 func (s *RscsServer) Get(w http.ResponseWriter, r *http.Request) {
 	pathElts := strings.Split(r.URL.Path, "/")
@@ -33,7 +28,7 @@ func (s *RscsServer) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "no value found", http.StatusNotFound)
 		return
 	}
-	jsonBytes, jsonErr := json.Marshal(GetResult{Value: value})
+	jsonBytes, jsonErr := json.Marshal(Value{Value: value})
 	if jsonErr != nil {
 		http.Error(w, jsonErr.Error(), http.StatusInternalServerError)
 		return

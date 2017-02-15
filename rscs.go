@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"github.com/bradclawsie/rscs/db"
 	"github.com/bradclawsie/rscs/server"
 	"log"
@@ -14,22 +15,35 @@ import (
 
 func main() {
 
-	const use = `use: rscs --db={sqlite db file}`
+	const use = `use: rscs --db={sqlite db file} [--create-only] [--port={portnum}]`
 
 	// Command line options.
 	var sqliteDBFile string
+	var createOnly bool
+	var portNum int
 	flag.StringVar(&sqliteDBFile, "db", "", "full path to sqlite db file")
+	flag.BoolVar(&createOnly, "create-only", false, "only create table in file and exit")
+	flag.IntVar(&portNum, "port", 8081, "port to listen on")
 	flag.Parse()
 
 	if sqliteDBFile == "" {
 		log.Fatal(use)
 	}
-	log.Printf("[rscs --db=%s]", sqliteDBFile)
 
 	rscsDB, rscsDBErr := db.NewRscsDB(sqliteDBFile)
 	if rscsDBErr != nil {
 		log.Fatal(rscsDBErr)
 	}
+
+	if createOnly {
+		createErr := rscsDB.CreateTable()
+		if createErr != nil {
+			log.Fatal(createErr.Error())
+		}
+		log.Printf("created")
+		os.Exit(0)
+	}
+
 	rscsServer, rscsSrvErr := server.NewRscsServer(rscsDB)
 	if rscsSrvErr != nil {
 		log.Fatal(rscsSrvErr)
@@ -43,7 +57,8 @@ func main() {
 		log.Fatal(rtrErr.Error())
 	}
 
-	srv := &http.Server{Addr: ":8081", Handler: rtr}
+	addrStr := fmt.Sprintf(":%d", portNum)
+	srv := &http.Server{Addr: addrStr, Handler: rtr}
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
