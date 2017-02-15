@@ -21,6 +21,11 @@ type Value struct {
 	Value string
 }
 
+// valueVerify is like Value but nil-able for some internal validation purposes.
+type valueVerify struct {
+	Value *string
+}
+
 // RscsServer contains the state values for the underlying database instance
 // and for https routing.
 type RscsServer struct {
@@ -41,6 +46,7 @@ func (s *RscsServer) NewRouter() (*chi.Mux, error) {
 
 	rtr.Get(KVRoute, s.Get)
 	rtr.Post(KVRoute, s.Insert)
+	rtr.Put(KVRoute, s.Update)
 	rtr.Get(StatusRoute, s.Status)
 
 	return rtr, nil

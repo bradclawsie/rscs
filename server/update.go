@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// Insert adds a new key/value pair.
-func (s *RscsServer) Insert(w http.ResponseWriter, r *http.Request) {
+// Update changes the value of an existing key/value pair.
+func (s *RscsServer) Update(w http.ResponseWriter, r *http.Request) {
 	pathElts := strings.Split(r.URL.Path, "/")
 	if len(pathElts) == 0 {
 		http.Error(w, "bad request path", http.StatusBadRequest)
@@ -33,15 +33,15 @@ func (s *RscsServer) Insert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rowCount, insertErr := s.rscsDB.Insert(key, *v.Value)
-	if insertErr != nil {
-		http.Error(w, insertErr.Error(), http.StatusBadRequest)
+	rowCount, updateErr := s.rscsDB.Update(key, *v.Value)
+	if updateErr != nil {
+		http.Error(w, updateErr.Error(), http.StatusBadRequest)
 		return
 	}
 	if rowCount != 1 {
-		http.Error(w, "bad number of rows created", http.StatusInternalServerError)
+		http.Error(w, "bad number of rows updated", http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	return
 }

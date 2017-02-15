@@ -119,6 +119,72 @@ func TestInsert(t *testing.T) {
 	}
 }
 
+func TestUpdate(t *testing.T) {
+	key := "key2"
+	val := "val2"
+	vIn := Value{Value: val}
+	vJSON, jsonErr := json.Marshal(vIn)
+	if jsonErr != nil {
+		t.Errorf(jsonErr.Error())
+	}
+
+	route := KVRoutePrefix + "/" + key
+	insertResp, _ := testRequest(t, testServer, http.MethodPost, route, bytes.NewReader(vJSON))
+	if insertResp.StatusCode != http.StatusCreated {
+		t.Errorf("insert:not 201")
+	}
+
+	getResp, getBody := testRequest(t, testServer, http.MethodGet, route, nil)
+	if getResp.StatusCode != http.StatusOK {
+		t.Errorf("get:not 200")
+	}
+	var vOut Value
+	umErr := json.Unmarshal([]byte(getBody), &vOut)
+	if umErr != nil {
+		t.Errorf(umErr.Error())
+	}
+	if vIn.Value != vOut.Value {
+		t.Errorf("round trip values not equal")
+	}
+
+	emptyKeyRoute := KVRoutePrefix + "/"
+	emptyKeyResp, _ := testRequest(t, testServer, http.MethodPut, emptyKeyRoute, bytes.NewReader(vJSON))
+	if emptyKeyResp.StatusCode == http.StatusOK {
+		t.Errorf("updated empty key")
+	}
+
+	badBytes := []byte(`{"V":"val"}`)
+	badJSONResp, _ := testRequest(t, testServer, http.MethodPut, route, bytes.NewReader(badBytes))
+	if badJSONResp.StatusCode == http.StatusOK {
+		t.Errorf("updated bad JSON")
+	}
+
+	newVal := "val2new"
+	vUpdate := Value{Value: newVal}
+	vJSON, jsonErr = json.Marshal(vUpdate)
+	if jsonErr != nil {
+		t.Errorf(jsonErr.Error())
+	}
+
+	updateResp, _ := testRequest(t, testServer, http.MethodPut, route, bytes.NewReader(vJSON))
+	if updateResp.StatusCode != http.StatusOK {
+		t.Errorf("update:not 200")
+	}
+
+	getResp, getBody = testRequest(t, testServer, http.MethodGet, route, nil)
+	if getResp.StatusCode != http.StatusOK {
+		t.Errorf("get:not 200")
+	}
+	var vUpdateGet Value
+	umErr = json.Unmarshal([]byte(getBody), &vUpdateGet)
+	if umErr != nil {
+		t.Errorf(umErr.Error())
+	}
+	if vUpdate.Value != vUpdateGet.Value {
+		t.Errorf("round trip values not equal")
+	}
+}
+
 func testRequest(t *testing.T, ts *httptest.Server, method, path string, body io.Reader) (*http.Response, string) {
 	req, err := http.NewRequest(method, ts.URL+path, body)
 	if err != nil {
