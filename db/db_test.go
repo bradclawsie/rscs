@@ -6,6 +6,7 @@ package db
 import (
 	"bytes"
 	"io/ioutil"
+	"log"
 	"os"
 	"testing"
 )
@@ -262,5 +263,69 @@ func TestWithReadonlyTempDB(t *testing.T) {
 	chmodErr = os.Chmod(tmpDBFile.Name(), 0755)
 	if chmodErr != nil {
 		t.Fatalf("chmod:%s", chmodErr.Error())
+	}
+}
+
+func Example() {
+	rscsDB, newErr := NewRscsDB("file::memory:?mode=memory&cache=shared")
+	if newErr != nil {
+		log.Fatalf("fail on tmpfile new:%s", newErr.Error())
+	}
+	createErr := rscsDB.CreateTable()
+	if createErr != nil {
+		log.Fatalf("fail on create table:%s", createErr.Error())
+	}
+	dupcreateErr := rscsDB.CreateTable()
+	if dupcreateErr == nil {
+		log.Fatalf("fail on duplicate create table:%s", dupcreateErr.Error())
+	}
+	dropErr := rscsDB.DropTable()
+	if dropErr != nil {
+		log.Fatalf("fail on drop table:%s", dropErr.Error())
+	}
+	recreateErr := rscsDB.CreateTable()
+	if recreateErr != nil {
+		log.Fatalf("fail on recreate table:%s", recreateErr.Error())
+	}
+
+	var rowCount int
+	var insertErr, updateErr, deleteErr error
+
+	testKey := "my-test-key"
+	testValue := "my-test-value"
+
+	rowCount, insertErr = rscsDB.Insert(testKey, testValue)
+	if insertErr != nil {
+		log.Fatalf("insert fail:%s", insertErr.Error())
+	}
+	if rowCount != 1 {
+		log.Fatalf("insert rowcount:%d", rowCount)
+	}
+
+	value, found, getErr := rscsDB.Get(testKey)
+	if getErr != nil {
+		log.Fatalf("get fail:%s", getErr.Error())
+	}
+	if !found {
+		log.Fatalf("%s not found", testKey)
+	}
+	if value != testValue {
+		log.Fatalf("%s and %s not equal", value, testValue)
+	}
+
+	rowCount, updateErr = rscsDB.Update(testKey, "my-new-val")
+	if updateErr != nil {
+		log.Fatalf("update fail:%s", updateErr.Error())
+	}
+	if rowCount != 1 {
+		log.Fatalf("update rowcount:%d", rowCount)
+	}
+
+	rowCount, deleteErr = rscsDB.Delete(testKey)
+	if deleteErr != nil {
+		log.Fatalf("delete fail:%s", deleteErr.Error())
+	}
+	if rowCount != 1 {
+		log.Fatalf("delete rowcount:%d", rowCount)
 	}
 }
