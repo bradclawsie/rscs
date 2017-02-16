@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/bradclawsie/rscs/db"
 	"github.com/pressly/chi"
+	"time"
 )
 
 const (
@@ -30,6 +31,7 @@ type valueVerify struct {
 // and for https routing.
 type RscsServer struct {
 	rscsDB *db.RscsDB
+	start  time.Time
 }
 
 // NewRscsServer initializes a new RscsServer instance.
@@ -37,7 +39,7 @@ func NewRscsServer(rscsDB *db.RscsDB) (*RscsServer, error) {
 	if rscsDB == nil {
 		return nil, errors.New("nil rscsDB")
 	}
-	return &RscsServer{rscsDB: rscsDB}, nil
+	return &RscsServer{rscsDB: rscsDB, start: time.Now()}, nil
 }
 
 // NewRouter provides a new chi router to pass to a server.
@@ -48,7 +50,7 @@ func (s *RscsServer) NewRouter() (*chi.Mux, error) {
 	rtr.Post(KVRoute, s.Insert)
 	rtr.Put(KVRoute, s.Update)
 	rtr.Delete(KVRoute, s.Delete)
-	
+
 	rtr.Get(StatusRoute, s.Status)
 
 	return rtr, nil

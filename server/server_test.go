@@ -87,9 +87,15 @@ func TestInsert(t *testing.T) {
 		t.Errorf(jsonErr.Error())
 	}
 
-	emptyKeyRoute := KVRoutePrefix + "/"
+	emptyKeyRoute := KVRoutePrefix
 	emptyKeyResp, _ := testRequest(t, testServer, http.MethodPost, emptyKeyRoute, bytes.NewReader(vJSON))
-	if emptyKeyResp.StatusCode == http.StatusCreated {
+	if emptyKeyResp.StatusCode != http.StatusNotFound {
+		t.Errorf("inserted empty route")
+	}
+
+	noKeyRoute := KVRoutePrefix + "/"
+	noKeyResp, _ := testRequest(t, testServer, http.MethodPost, noKeyRoute, bytes.NewReader(vJSON))
+	if noKeyResp.StatusCode != http.StatusBadRequest {
 		t.Errorf("inserted empty key")
 	}
 
@@ -147,9 +153,15 @@ func TestUpdate(t *testing.T) {
 		t.Errorf("round trip values not equal")
 	}
 
-	emptyKeyRoute := KVRoutePrefix + "/"
+	emptyKeyRoute := KVRoutePrefix
 	emptyKeyResp, _ := testRequest(t, testServer, http.MethodPut, emptyKeyRoute, bytes.NewReader(vJSON))
-	if emptyKeyResp.StatusCode == http.StatusOK {
+	if emptyKeyResp.StatusCode != http.StatusNotFound {
+		t.Errorf("updated empty route")
+	}
+
+	noKeyRoute := KVRoutePrefix + "/"
+	noKeyResp, _ := testRequest(t, testServer, http.MethodPut, noKeyRoute, bytes.NewReader(vJSON))
+	if noKeyResp.StatusCode != http.StatusBadRequest {
 		t.Errorf("updated empty key")
 	}
 
@@ -213,9 +225,15 @@ func TestDelete(t *testing.T) {
 		t.Errorf("round trip values not equal")
 	}
 
-	emptyKeyRoute := KVRoutePrefix + "/"
+	emptyKeyRoute := KVRoutePrefix
 	emptyKeyResp, _ := testRequest(t, testServer, http.MethodDelete, emptyKeyRoute, nil)
-	if emptyKeyResp.StatusCode == http.StatusOK {
+	if emptyKeyResp.StatusCode != http.StatusNotFound {
+		t.Errorf("deleted empty route")
+	}
+
+	noKeyRoute := KVRoutePrefix + "/"
+	noKeyResp, _ := testRequest(t, testServer, http.MethodDelete, noKeyRoute, nil)
+	if noKeyResp.StatusCode != http.StatusBadRequest {
 		t.Errorf("deleted empty key")
 	}
 
