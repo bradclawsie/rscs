@@ -82,6 +82,7 @@ func TestWithTempDB(t *testing.T) {
 		for i := 0; i < 255; i++ {
 			goodKey.WriteString("a")
 		}
+
 		rowCount, insertErr = rscsDB.Insert(goodKey.String(), testValue)
 		if insertErr != nil {
 			t.Errorf("insert fail:%s", insertErr.Error())
@@ -113,6 +114,15 @@ func TestWithTempDB(t *testing.T) {
 		if rowCount != 0 {
 			t.Errorf("rowcount nonzero")
 		}
+
+		rowCount, updateErr = rscsDB.Update("notthere", "newval")
+		if updateErr != nil {
+			t.Errorf("update fail:%s", updateErr.Error())
+		}
+		if rowCount != 0 {
+			t.Errorf("update rowcount:%d", rowCount)
+		}
+
 		rowCount, updateErr = rscsDB.Update(testKey, "newval")
 		if updateErr != nil {
 			t.Errorf("update fail:%s", updateErr.Error())
@@ -120,6 +130,7 @@ func TestWithTempDB(t *testing.T) {
 		if rowCount != 1 {
 			t.Errorf("update rowcount:%d", rowCount)
 		}
+
 		value, found, getErr := rscsDB.Get(testKey)
 		if getErr != nil {
 			t.Errorf("get fail:%s", getErr.Error())
@@ -140,6 +151,15 @@ func TestWithTempDB(t *testing.T) {
 		if rowCount != 0 {
 			t.Errorf("rowcount nonzero")
 		}
+
+		rowCount, deleteErr = rscsDB.Delete("notthere")
+		if deleteErr != nil {
+			t.Errorf("delete missing key")
+		}
+		if rowCount != 0 {
+			t.Errorf("rowcount nonzero")
+		}
+
 		rowCount, deleteErr = rscsDB.Delete(testKey)
 		if deleteErr != nil {
 			t.Errorf("delete fail:%s", deleteErr.Error())

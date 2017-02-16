@@ -228,7 +228,7 @@ func TestDelete(t *testing.T) {
 	emptyKeyRoute := KVRoutePrefix
 	emptyKeyResp, _ := testRequest(t, testServer, http.MethodDelete, emptyKeyRoute, nil)
 	if emptyKeyResp.StatusCode != http.StatusNotFound {
-		t.Errorf("deleted empty route")
+		t.Errorf("deleted on empty route")
 	}
 
 	noKeyRoute := KVRoutePrefix + "/"

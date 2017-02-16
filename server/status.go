@@ -15,7 +15,7 @@ type StatusResult struct {
 	Uptime string
 }
 
-// Status returns the sytem status as JSON.
+// Status returns the system status as JSON.
 func (s *RscsServer) Status(w http.ResponseWriter, r *http.Request) {
 	uptime := fmt.Sprintf("%v", time.Since(s.start))
 	jsonBytes, jsonErr := json.Marshal(StatusResult{

@@ -20,13 +20,13 @@ func (s *RscsServer) Insert(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing key", http.StatusBadRequest)
 		return
 	}
-	
+
 	body, bodyErr := ioutil.ReadAll(r.Body)
 	if bodyErr != nil {
 		http.Error(w, "cannot read body", http.StatusBadRequest)
 		return
 	}
-	
+
 	var v valueVerify
 	umErr := json.Unmarshal(body, &v)
 	if umErr != nil || v.Value == nil {
@@ -42,7 +42,7 @@ func (s *RscsServer) Insert(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad number of rows created", http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.WriteHeader(http.StatusCreated)
 	return
 }
