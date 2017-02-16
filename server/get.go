@@ -1,4 +1,3 @@
-// Package server provides an Http interface to Rscs.
 package server
 
 import (
