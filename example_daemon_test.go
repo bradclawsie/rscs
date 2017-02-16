@@ -1,6 +1,6 @@
 // This example is very similar to rscs.go with some code removed for simplicity.
 // This requires Go 1.8* to compile.
-package rscs_test
+package doc
 
 import (
 	"flag"
