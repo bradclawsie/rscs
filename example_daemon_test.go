@@ -1,6 +1,6 @@
 // This example is very similar to rscs.go with some code removed for simplicity.
 // This requires Go 1.8* to compile.
-package main
+package rscs_test
 
 import (
 	"flag"
@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func main() {
+func Example_daemon() {
 
 	// You need a sqlite file. We assume here that you have one with
 	// a pre-existing `kv` table, if not, look at rscs.go in this directory
