@@ -47,7 +47,7 @@ and secure your data however you wish. If you want a value to be
 encrypted, encrypt it. If you don't want people snooping at the SQLite
 file, use user/group file permissioning to give you the level of
 security you need. If you want to support temporary passwords or some
-other nify Vault feature, extend the code and manage the rows yourself.
+other nifty Vault feature, extend the code and manage the rows yourself.
 
 ### What about binary data?
 
