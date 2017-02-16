@@ -69,7 +69,7 @@ Yes. The **RSCS** codebase is intended to be very simple and only
 provide the most basic features. You should read the code instead of
 relying on `godoc`. If you want something more complex, just take
 ownership of your fork and make changes to the source. You will be far
-happier with source-code editions than having to master tuning a large
+happier with source-code modifications than having to master tuning a large
 number of optional features. This was what drove me away from Consul
 and Vault...they are both too complex and seem intent on solving
 everyone's problem from one code base. I am confident that even a
