@@ -3,19 +3,13 @@ package server
 
 import (
 	"net/http"
-	"strings"
 )
 
 // Delete removes a row identified by a key.
 func (s *RscsServer) Delete(w http.ResponseWriter, r *http.Request) {
-	pathElts := strings.Split(r.URL.Path, "/")
-	if len(pathElts) == 0 {
-		http.Error(w, "bad request path", http.StatusBadRequest)
-		return
-	}
-	key := pathElts[len(pathElts)-1]
-	if key == "" {
-		http.Error(w, "missing key", http.StatusBadRequest)
+	key, keyErr := extractKeyContext(r)
+	if keyErr != nil {
+		http.Error(w, keyErr.Error(), http.StatusInternalServerError)
 		return
 	}
 

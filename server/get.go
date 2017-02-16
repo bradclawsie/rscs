@@ -4,19 +4,13 @@ package server
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 )
 
 // Get retrieves the value for the key passed on the URL path.
 func (s *RscsServer) Get(w http.ResponseWriter, r *http.Request) {
-	pathElts := strings.Split(r.URL.Path, "/")
-	if len(pathElts) == 0 {
-		http.Error(w, "bad request path", http.StatusBadRequest)
-		return
-	}
-	key := pathElts[len(pathElts)-1]
-	if key == "" {
-		http.Error(w, "missing key", http.StatusBadRequest)
+	key, keyErr := extractKeyContext(r)
+	if keyErr != nil {
+		http.Error(w, keyErr.Error(), http.StatusInternalServerError)
 		return
 	}
 

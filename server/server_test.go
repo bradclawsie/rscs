@@ -95,7 +95,7 @@ func TestInsert(t *testing.T) {
 
 	noKeyRoute := KVRoutePrefix + "/"
 	noKeyResp, _ := testRequest(t, testServer, http.MethodPost, noKeyRoute, bytes.NewReader(vJSON))
-	if noKeyResp.StatusCode != http.StatusBadRequest {
+	if noKeyResp.StatusCode == http.StatusCreated {
 		t.Errorf("inserted empty key")
 	}
 
@@ -161,7 +161,7 @@ func TestUpdate(t *testing.T) {
 
 	noKeyRoute := KVRoutePrefix + "/"
 	noKeyResp, _ := testRequest(t, testServer, http.MethodPut, noKeyRoute, bytes.NewReader(vJSON))
-	if noKeyResp.StatusCode != http.StatusBadRequest {
+	if noKeyResp.StatusCode == http.StatusOK {
 		t.Errorf("updated empty key")
 	}
 
@@ -233,7 +233,7 @@ func TestDelete(t *testing.T) {
 
 	noKeyRoute := KVRoutePrefix + "/"
 	noKeyResp, _ := testRequest(t, testServer, http.MethodDelete, noKeyRoute, nil)
-	if noKeyResp.StatusCode != http.StatusBadRequest {
+	if noKeyResp.StatusCode == http.StatusOK {
 		t.Errorf("deleted empty key")
 	}
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/bradclawsie/rscs/db"
 	"github.com/pressly/chi"
+	"github.com/pressly/chi/middleware"
 	"time"
 )
 
@@ -15,6 +16,8 @@ const (
 	KVRoute = KVRoutePrefix + "/:key"
 	// StatusRoute is the route for system status.
 	StatusRoute = "/v1/status"
+	// keyName is the string for 'key'.
+	keyName = "key"
 )
 
 // Value corresponds to a row value.
@@ -45,11 +48,15 @@ func NewRscsServer(rscsDB *db.RscsDB) (*RscsServer, error) {
 // NewRouter provides a new chi router to pass to a server.
 func (s *RscsServer) NewRouter() (*chi.Mux, error) {
 	rtr := chi.NewRouter()
+	rtr.Use(middleware.Recoverer)
 
-	rtr.Get(KVRoute, s.Get)
-	rtr.Post(KVRoute, s.Insert)
-	rtr.Put(KVRoute, s.Update)
-	rtr.Delete(KVRoute, s.Delete)
+	rtr.Route(KVRoute, func(rtr chi.Router) {
+		rtr.Use(insertKeyContext)
+		rtr.Get("/", s.Get)
+		rtr.Post("/", s.Insert)
+		rtr.Put("/", s.Update)
+		rtr.Delete("/", s.Delete)
+	})
 
 	rtr.Get(StatusRoute, s.Status)
 
