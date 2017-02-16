@@ -47,7 +47,7 @@ func TestMain(m *testing.M) {
 func TestStatus(t *testing.T) {
 	resp, statusJSON := testRequest(t, testServer, http.MethodGet, StatusRoute, nil)
 	if resp.StatusCode != http.StatusOK {
-		t.Errorf("not 200")
+		t.Errorf("status:not 200")
 	}
 	var status StatusResult
 	umErr := json.Unmarshal([]byte(statusJSON), &status)
@@ -102,12 +102,12 @@ func TestInsert(t *testing.T) {
 
 	insertResp, _ := testRequest(t, testServer, http.MethodPost, route, bytes.NewReader(vJSON))
 	if insertResp.StatusCode != http.StatusCreated {
-		t.Errorf("not 201")
+		t.Errorf("insert:not 201")
 	}
 
 	getResp, getBody := testRequest(t, testServer, http.MethodGet, route, nil)
 	if getResp.StatusCode != http.StatusOK {
-		t.Errorf("not 200")
+		t.Errorf("get:not 200")
 	}
 	var vOut Value
 	umErr := json.Unmarshal([]byte(getBody), &vOut)
@@ -182,6 +182,51 @@ func TestUpdate(t *testing.T) {
 	}
 	if vUpdate.Value != vUpdateGet.Value {
 		t.Errorf("round trip values not equal")
+	}
+}
+
+func TestDelete(t *testing.T) {
+	key := "key3"
+	val := "val3"
+	vIn := Value{Value: val}
+	vJSON, jsonErr := json.Marshal(vIn)
+	if jsonErr != nil {
+		t.Errorf(jsonErr.Error())
+	}
+
+	route := KVRoutePrefix + "/" + key
+	insertResp, _ := testRequest(t, testServer, http.MethodPost, route, bytes.NewReader(vJSON))
+	if insertResp.StatusCode != http.StatusCreated {
+		t.Errorf("insert:not 201")
+	}
+
+	getResp, getBody := testRequest(t, testServer, http.MethodGet, route, nil)
+	if getResp.StatusCode != http.StatusOK {
+		t.Errorf("get:not 200")
+	}
+	var vOut Value
+	umErr := json.Unmarshal([]byte(getBody), &vOut)
+	if umErr != nil {
+		t.Errorf(umErr.Error())
+	}
+	if vIn.Value != vOut.Value {
+		t.Errorf("round trip values not equal")
+	}
+
+	emptyKeyRoute := KVRoutePrefix + "/"
+	emptyKeyResp, _ := testRequest(t, testServer, http.MethodDelete, emptyKeyRoute, nil)
+	if emptyKeyResp.StatusCode == http.StatusOK {
+		t.Errorf("deleted empty key")
+	}
+
+	deleteResp, _ := testRequest(t, testServer, http.MethodDelete, route, nil)
+	if deleteResp.StatusCode != http.StatusOK {
+		t.Errorf("delete:not 200")
+	}
+
+	getResp, _ = testRequest(t, testServer, http.MethodGet, route, nil)
+	if getResp.StatusCode != http.StatusNotFound {
+		t.Errorf("get:not 404")
 	}
 }
 

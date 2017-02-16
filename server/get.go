@@ -19,6 +19,7 @@ func (s *RscsServer) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing key", http.StatusBadRequest)
 		return
 	}
+
 	value, found, getErr := s.rscsDB.Get(key)
 	if getErr != nil {
 		http.Error(w, getErr.Error(), http.StatusInternalServerError)
@@ -28,11 +29,13 @@ func (s *RscsServer) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "no value found", http.StatusNotFound)
 		return
 	}
+
 	jsonBytes, jsonErr := json.Marshal(Value{Value: value})
 	if jsonErr != nil {
 		http.Error(w, jsonErr.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	w.Header().Set("Content-type", "application/json")
 	w.Write(jsonBytes)
 	return

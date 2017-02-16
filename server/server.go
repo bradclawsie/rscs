@@ -47,6 +47,8 @@ func (s *RscsServer) NewRouter() (*chi.Mux, error) {
 	rtr.Get(KVRoute, s.Get)
 	rtr.Post(KVRoute, s.Insert)
 	rtr.Put(KVRoute, s.Update)
+	rtr.Delete(KVRoute, s.Delete)
+	
 	rtr.Get(StatusRoute, s.Status)
 
 	return rtr, nil
