@@ -8,10 +8,7 @@
 
 **RSCS** allows you to store text values for keys in a SQLite
 database. That is *all* it does. You will not find any of the features
-offered by more complex clustered configuration databases. For
-example, there is no support for protocols like Raft. There is no
-support for "sealing" the database like Vault. You have keys, values,
-and a daemon that provides basic REST support. That is it.
+offered by more complex clustered configuration databases. 
 
 ### What's wrong with Consul and Vault?
 
@@ -39,7 +36,7 @@ That is it. If you want more, extend the codebase yourself.
 
 ### How do you achieve clustering? Do you support the Raft protocol?
 
-No. There is no clustering. If you want clustering, you can build it
+There is no clustering. If you want clustering, you can build it
 on top of **RSCS** because the codebase is intended to be very simple
 to read and understand in just a few hours.
 
@@ -49,7 +46,8 @@ You can store whatever you want (within the limits of SQLite)
 and secure your data however you wish. If you want a value to be
 encrypted, encrypt it. If you don't want people snooping at the SQLite
 file, use user/group file permissioning to give you the level of
-security you need.
+security you need. If you want to support temporary passwords or some
+other nify Vault feature, extend the code and manage the rows yourself.
 
 ### What about binary data?
 
