@@ -74,6 +74,13 @@ library somewhere else that understands the shape of your values.
 external traffic. If you still believe you want the extra assurances
 of https, then go in to the `rscs.go` file and change it.
 
+### I don't want the daemon accepting external requests.
+
+Change the connect string to in `rscs.go` to specify `localhost` prior
+to the `:` in the address, or better yet, use `iptables` to shape your
+traffic. Using `iptables` allows you to change your traffic shaping on
+demand. 
+
 ### You keep saying "change the code"...
 
 Yes. The **RSCS** codebase is intended to be very simple and only
