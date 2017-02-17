@@ -15,16 +15,24 @@ import (
 
 func main() {
 
-	const use = `use: rscs --db={sqlite db file} [--create-only] [--port={portnum}]`
+	const use = `use: rscs --db={sqlite db file} [--create-only] [--memory] [--port={portnum}]`
 
 	// Command line options.
 	var sqliteDBFile string
-	var createOnly bool
+	var createOnly, memory bool
 	var portNum int
+
 	flag.StringVar(&sqliteDBFile, "db", "", "full path to sqlite db file")
 	flag.BoolVar(&createOnly, "create-only", false, "only create table in file and exit")
+	flag.BoolVar(&memory, "memory", false, "run rscs in-memory only")
 	flag.IntVar(&portNum, "port", 8081, "port to listen on")
 	flag.Parse()
+
+	const memoryDBName = "file::memory:?mode=memory&cache=shared"
+
+	if memory {
+		sqliteDBFile = memoryDBName
+	}
 
 	if sqliteDBFile == "" {
 		log.Fatal(use)
@@ -35,13 +43,17 @@ func main() {
 		log.Fatal(rscsDBErr)
 	}
 
-	if createOnly {
+	if createOnly || memory {
+		// In either case we require the table to be created.
 		createErr := rscsDB.CreateTable()
 		if createErr != nil {
 			log.Fatal(createErr.Error())
 		}
 		log.Printf("created")
-		os.Exit(0)
+		if !memory {
+			// If we only want the db created and nothing else, exit.
+			os.Exit(0)
+		}
 	}
 
 	rscsServer, rscsSrvErr := server.NewRscsServer(rscsDB)

@@ -120,6 +120,13 @@ imposing a complex framework model.
 
 `$ rscs --db=/tmp/test.sqlite3`
 
+*alternately, you can run with sqlite in-memory only, but changes will
+be lost on termination:*
+
+`$ rscs --memory`
+
+you can also set the port with the `--port` flag.
+
 *now do some transactions:*
 
 *status:*
