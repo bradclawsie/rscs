@@ -17,7 +17,8 @@ func (s *RscsServer) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, deleteErr.Error(), http.StatusInternalServerError)
 		return
 	}
-	if rowCount != 1 {
+	// We allow for zero or one rows to be deleted.
+	if rowCount > 1 {
 		http.Error(w, "bad number of rows updated", http.StatusInternalServerError)
 		return
 	}
