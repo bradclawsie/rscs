@@ -15,7 +15,8 @@ offered by more complex clustered configuration databases.
 Nothing! I've used them in the past. I simply find they are too much
 for my requirements and I don't want deal with complexity I will
 never use. **RSCS** is for people who want a single, simple, available
-local key/value store and nothing more. 
+local key/value store and nothing more...simple enough to extend for
+your legitimate needs without weighing you down with someone else's.
 
 ### Why do you use SQLite instead of $X?
 
@@ -56,6 +57,16 @@ Encode it as text using base64 or another textual encoding.
 ### How is output delivered?
 
 JSON which is trivial: `{"Value":"your value"}`. Extend it if you want.
+
+### Okay, you use JSON to encapsulate values...but...
+
+If you want to store *your* JSON in **RSCS** and not have to worry about
+escaping quotes, base64 encode it.
+
+### But if I base64 all my values, I have to do some work to decode them.
+
+Yes. This is a minimal service. Extend it for your needs or write a
+library somewhere else that understands the shape of your values.
 
 ### The default daemon is http! Yuck!
 
@@ -151,5 +162,5 @@ output:
 
 Send any signal to the process that satisfies `os.Interrupt` (on Linux
 systems, `SIGINT`). The daemon uses the graceful stopping feature made
-available in Go 1.8 in the standard library.
+available in Go 1.8 standard library.
 
