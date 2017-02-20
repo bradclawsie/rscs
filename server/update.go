@@ -27,9 +27,10 @@ func (s *RscsServer) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Value JSON malformed", http.StatusBadRequest)
 		return
 	}
+
 	rowCount, updateErr := s.rscsDB.Update(key, *v.Value)
 	if updateErr != nil {
-		http.Error(w, updateErr.Error(), http.StatusBadRequest)
+		http.Error(w, updateErr.Error(), http.StatusInternalServerError)
 		return
 	}
 

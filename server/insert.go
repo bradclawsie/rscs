@@ -26,13 +26,15 @@ func (s *RscsServer) Insert(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Value JSON malformed", http.StatusBadRequest)
 		return
 	}
+
 	rowCount, insertErr := s.rscsDB.Insert(key, *v.Value)
 	if insertErr != nil {
-		http.Error(w, insertErr.Error(), http.StatusBadRequest)
+		http.Error(w, insertErr.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	if rowCount != 1 {
-		http.Error(w, "bad number of rows created", http.StatusInternalServerError)
+		http.Error(w, "bad number of rows inserted", http.StatusInternalServerError)
 		return
 	}
 

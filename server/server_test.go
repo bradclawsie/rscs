@@ -79,6 +79,14 @@ func TestNilRscsDB(t *testing.T) {
 	}
 }
 
+func TestGet(t *testing.T) {
+	route := KVRoutePrefix + "/not-there"
+	getResp, _ := testRequest(t, testServer, http.MethodGet, route, nil)
+	if getResp.StatusCode != http.StatusNotFound {
+		t.Errorf("get:not 404")
+	}
+}
+
 func TestInsert(t *testing.T) {
 	key := "key1"
 	val := "val1"
@@ -123,6 +131,11 @@ func TestInsert(t *testing.T) {
 	}
 	if vIn.Value != vOut.Value {
 		t.Errorf("round trip values not equal")
+	}
+
+	insertResp, _ = testRequest(t, testServer, http.MethodPost, route, nil)
+	if insertResp.StatusCode != http.StatusBadRequest {
+		t.Errorf("insert:not 400")
 	}
 }
 
@@ -195,6 +208,18 @@ func TestUpdate(t *testing.T) {
 	}
 	if vUpdate.Value != vUpdateGet.Value {
 		t.Errorf("round trip values not equal")
+	}
+
+	route = KVRoutePrefix + "/not-there"
+	updateResp, _ = testRequest(t, testServer, http.MethodPut, route, bytes.NewReader(vJSON))
+	if updateResp.StatusCode != http.StatusNotFound {
+		t.Errorf("update:not 404")
+	}
+
+	route = KVRoutePrefix + "/" + key
+	updateResp, _ = testRequest(t, testServer, http.MethodPut, route, nil)
+	if updateResp.StatusCode != http.StatusBadRequest {
+		t.Errorf("update:not 400")
 	}
 }
 
