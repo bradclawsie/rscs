@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -18,8 +19,10 @@ func (s *RscsServer) Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, getErr.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	if !found {
-		http.Error(w, "no value found", http.StatusNotFound)
+		e := fmt.Sprintf("no key '%s' found", key)
+		http.Error(w, e, http.StatusNotFound)
 		return
 	}
 

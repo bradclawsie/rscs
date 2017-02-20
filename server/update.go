@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -29,6 +30,12 @@ func (s *RscsServer) Update(w http.ResponseWriter, r *http.Request) {
 	rowCount, updateErr := s.rscsDB.Update(key, *v.Value)
 	if updateErr != nil {
 		http.Error(w, updateErr.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if rowCount == 0 {
+		e := fmt.Sprintf("no key '%s' found", key)
+		http.Error(w, e, http.StatusNotFound)
 		return
 	}
 	if rowCount != 1 {

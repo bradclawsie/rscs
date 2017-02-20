@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -17,7 +18,13 @@ func (s *RscsServer) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, deleteErr.Error(), http.StatusInternalServerError)
 		return
 	}
-	// We allow for zero or one rows to be deleted.
+
+	// Caller can ignore return value for deletes on keys not found.
+	if rowCount == 0 {
+		e := fmt.Sprintf("no key '%s' found", key)
+		http.Error(w, e, http.StatusNotFound)
+		return
+	}
 	if rowCount > 1 {
 		http.Error(w, "bad number of rows updated", http.StatusInternalServerError)
 		return
