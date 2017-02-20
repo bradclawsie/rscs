@@ -112,6 +112,12 @@ imposing a complex framework model.
 
 ### Okay, I get it, just show me how it is used.
 
+*get it:*
+
+`$ go get github.com/bradclawsie/rscs`
+
+`rscs` *is now in your* `$GOPATH/bin` *we'll assume that below...*
+
 *create an empty db:*
 
 `$ rscs --db=/tmp/test.sqlite3 --create-only`
