@@ -87,13 +87,12 @@ of `localhost`.
 Yes. The **RSCS** codebase is intended to be very simple and only
 provide the most basic features. You should read the code instead of
 relying on `godoc`. If you want something more complex, just take
-ownership of your fork and make changes to the source. You will be far
-happier with source-code modifications than having to master tuning a large
-number of optional features. This was what drove me away from Consul
-and Vault...they are both too complex and seem intent on solving
-everyone's problem from one code base. I am confident that even a
-novice Go programmer can modify the **RSCS** codebase to suit their
-particular needs.
+ownership of your fork and make changes to the source. 
+
+Since the **RSCS** codebase will always be kept minimal and nearly
+feature-free, it should be very easy to maintain a fork and merge 
+periodically from this repository if you choose to do so, hopefully
+without merge conflicts.
 
 ### I read the code...there's almost nothing there. What's the point?
 
