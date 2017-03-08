@@ -75,12 +75,12 @@ library somewhere else that understands the shape of your values.
 external traffic. If you still believe you want the extra assurances
 of https, then go in to the `rscs.go` file and change it.
 
-### I don't want the daemon accepting external requests.
+### I don't want the daemon accepting external requests, or I do...or...
 
-Change the connect string to in `rscs.go` to specify `localhost` prior
-to the `:` in the address, or better yet, use `iptables` to shape your
-traffic. Using `iptables` allows you to change your traffic shaping on
-demand. 
+There is a `--port` argument that `rscs` accepts, but for interface
+binding, I recommend changing the source. Currently, the default is
+the empty interface which Go will default to the conservative choice
+of `localhost`. 
 
 ### You keep saying "change the code"...
 
