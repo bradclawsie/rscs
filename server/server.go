@@ -3,17 +3,18 @@ package server
 
 import (
 	"errors"
-	"github.com/bradclawsie/rscs/db"
-	"github.com/pressly/chi"
-	"github.com/pressly/chi/middleware"
 	"time"
+
+	"github.com/bradclawsie/rscs/db"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 const (
 	// KVRoutePrefix is the prefix for the kv route.
 	KVRoutePrefix = "/v1/kv"
 	// KVRoute is the route for all key/val operations.
-	KVRoute = KVRoutePrefix + "/:key"
+	KVRoute = KVRoutePrefix + "/{key}"
 	// StatusRoute is the route for system status.
 	StatusRoute = "/v1/status"
 	// keyName is the string for 'key'.

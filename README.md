@@ -116,7 +116,7 @@ You must use Go 1.8 or higher.
 
 ### Why do you use a router like Chi if you want to keep things "ridiculously simple"?
 
-[Chi](https://github.com/pressly/chi) is a very simple router that
+[Chi](https://github.com/go-chi/chi) is a very simple router that
 allows our codebase to be much more compact and readable without
 imposing a complex framework model.
 

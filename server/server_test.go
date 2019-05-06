@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
-	"github.com/bradclawsie/rscs/db"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,6 +11,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/bradclawsie/rscs/db"
 )
 
 const (

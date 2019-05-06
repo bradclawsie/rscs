@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/pressly/chi"
 	"net/http"
+
+	"github.com/go-chi/chi"
 )
 
 // ContextKeyType is the type used to reference values in the Context.
