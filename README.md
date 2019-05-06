@@ -5,6 +5,17 @@
 
 # The Ridiculously Simple Configuration System
 
+## Why Is This Here?
+
+I was recently asked what my motivations were for posting such a
+trivial codebase. Well, first, I use it...but more importantly, I use
+it as a seed for lots of other projects, including at the office. I
+got tired of building a basic database-enabled http server over and
+over again so I decided to just publish the base essence with a
+liberal license so I can use it as a starter whenever I need to start
+a similar project (which seems to be a lot). Now, back to discussing
+this repo in isolation!
+
 **RSCS** is a configuration database that is ridiculously simple. 
 
 **RSCS** allows you to store text values for keys in a SQLite
